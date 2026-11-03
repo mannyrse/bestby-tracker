@@ -1,0 +1,36 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f4f4f5;
+}
+
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.item-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.item {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.item-date {
+  color: #555;
+}
