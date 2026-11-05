@@ -13,6 +13,10 @@ function App() {
   const [name, setName] = useState('')
   const [bestBy, setBestBy] = useState('')
 
+  const [editingId, setEditingId] = useState(null)
+  const [editName, setEditName] = useState('')
+  const [editBestBy, setEditBestBy] = useState('')
+
   const activeItems = items
     .filter((item) => item.status === 'active')
     .sort((a, b) => a.bestBy.localeCompare(b.bestBy))
@@ -40,6 +44,34 @@ function App() {
     )
   }
 
+  function startEdit(item) {
+    setEditingId(item.id)
+    setEditName(item.name)
+    setEditBestBy(item.bestBy)
+  }
+
+  function saveEdit(event) {
+    event.preventDefault()
+    setItems(
+      items.map((item) =>
+        item.id === editingId
+          ? { ...item, name: editName.trim(), bestBy: editBestBy }
+          : item
+      )
+    )
+    setEditingId(null)
+  }
+
+  function cancelEdit() {
+    setEditingId(null)
+  }
+
+  function deleteItem(id) {
+    if (window.confirm('Delete this entry? This cannot be undone.')) {
+      setItems(items.filter((item) => item.id !== id))
+    }
+  }
+
   return (
     <div className="app">
       <h1>Best-By Tracker</h1>
@@ -65,9 +97,36 @@ function App() {
       <ul className="item-list">
         {activeItems.map((item) => (
           <li key={item.id} className="item">
-            <div>{item.name}</div>
-            <div>{item.bestBy}</div>
-            <button onClick={() => markHandled(item.id)}>Mark handled</button>
+            {item.id === editingId ? (
+              <form onSubmit={saveEdit}>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={(event) => setEditName(event.target.value)}
+                  required
+                />
+                <input
+                  type="date"
+                  value={editBestBy}
+                  onChange={(event) => setEditBestBy(event.target.value)}
+                  required
+                />
+                <button type="submit">Save</button>
+                <button type="button" onClick={cancelEdit}>
+                  Cancel
+                </button>
+              </form>
+            ) : (
+              <>
+                <div>{item.name}</div>
+                <div>{item.bestBy}</div>
+                <button onClick={() => markHandled(item.id)}>
+                  Mark handled
+                </button>
+                <button onClick={() => startEdit(item)}>Edit</button>
+                <button onClick={() => deleteItem(item.id)}>Delete</button>
+              </>
+            )}
           </li>
         ))}
       </ul>
@@ -78,6 +137,7 @@ function App() {
           <li key={item.id} className="item">
             <div>{item.name}</div>
             <div>{item.bestBy}</div>
+            <button onClick={() => deleteItem(item.id)}>Delete</button>
           </li>
         ))}
       </ul>
