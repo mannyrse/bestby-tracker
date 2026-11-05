@@ -34,3 +34,8 @@ body {
 .item-date {
   color: #555;
 }
+
+.scanner-video {
+  width: 100%;
+  max-width: 400px;
+}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import Scanner from './Scanner'
 
 const starterItems = [
   { id: 1, name: 'Buldak Ramen', bestBy: '2026-11-08', status: 'active' },
@@ -32,11 +33,19 @@ function App() {
   const [editName, setEditName] = useState('')
   const [editBestBy, setEditBestBy] = useState('')
 
+  const [barcode, setBarcode] = useState('')
+  const [scanning, setScanning] = useState(false)
+
   const activeItems = items
     .filter((item) => item.status === 'active')
     .sort((a, b) => a.bestBy.localeCompare(b.bestBy))
 
   const handledItems = items.filter((item) => item.status === 'handled')
+
+  function handleDetected(code) {
+    setBarcode(code)
+    setScanning(false)
+  }
 
   function addItem(event) {
     event.preventDefault()
@@ -44,11 +53,13 @@ function App() {
       id: Date.now(),
       name: name.trim(),
       bestBy: bestBy,
+      barcode: barcode.trim(),
       status: 'active',
     }
     setItems([...items, newItem])
     setName('')
     setBestBy('')
+    setBarcode('')
   }
 
   function markHandled(id) {
@@ -91,6 +102,13 @@ function App() {
     <div className="app">
       <h1>Best-By Tracker</h1>
 
+      {scanning && (
+        <Scanner
+          onDetected={handleDetected}
+          onClose={() => setScanning(false)}
+        />
+      )}
+
       <form onSubmit={addItem}>
         <input
           type="text"
@@ -105,6 +123,15 @@ function App() {
           onChange={(event) => setBestBy(event.target.value)}
           required
         />
+        <input
+          type="text"
+          placeholder="Barcode (optional)"
+          value={barcode}
+          onChange={(event) => setBarcode(event.target.value)}
+        />
+        <button type="button" onClick={() => setScanning(true)}>
+          Scan barcode
+        </button>
         <button type="submit">Add</button>
       </form>
 
