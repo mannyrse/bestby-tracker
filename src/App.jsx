@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import Scanner from './Scanner'
+import { fetchProduct } from './openFoodFacts'
 
 const starterItems = [
   { id: 1, name: 'Buldak Ramen', bestBy: '2026-11-08', status: 'active' },
@@ -23,9 +24,6 @@ function loadItems() {
 function App() {
   const [items, setItems] = useState(loadItems)
 
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-  }, [items])
   const [name, setName] = useState('')
   const [bestBy, setBestBy] = useState('')
 
@@ -36,15 +34,42 @@ function App() {
   const [barcode, setBarcode] = useState('')
   const [scanning, setScanning] = useState(false)
 
+  const [imageUrl, setImageUrl] = useState('')
+  const [lookupStatus, setLookupStatus] = useState('')
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+  }, [items])
+
   const activeItems = items
     .filter((item) => item.status === 'active')
     .sort((a, b) => a.bestBy.localeCompare(b.bestBy))
 
   const handledItems = items.filter((item) => item.status === 'handled')
 
+  async function lookupBarcode(code) {
+    const cleaned = code.trim()
+    if (!cleaned) return
+
+    setLookupStatus('loading')
+    try {
+      const product = await fetchProduct(cleaned)
+      if (product && product.name) {
+        setName(product.name)
+        setImageUrl(product.imageUrl)
+        setLookupStatus('found')
+      } else {
+        setLookupStatus('notfound')
+      }
+    } catch {
+      setLookupStatus('error')
+    }
+  }
+
   function handleDetected(code) {
     setBarcode(code)
     setScanning(false)
+    lookupBarcode(code)
   }
 
   function addItem(event) {
@@ -54,12 +79,15 @@ function App() {
       name: name.trim(),
       bestBy: bestBy,
       barcode: barcode.trim(),
+      imageUrl: imageUrl.trim(),
       status: 'active',
     }
     setItems([...items, newItem])
     setName('')
     setBestBy('')
     setBarcode('')
+    setImageUrl('')
+    setLookupStatus('')
   }
 
   function markHandled(id) {
@@ -129,11 +157,34 @@ function App() {
           value={barcode}
           onChange={(event) => setBarcode(event.target.value)}
         />
+        <button type="button" onClick={() => lookupBarcode(barcode)}>
+          Look up
+        </button>
+        <input
+          type="text"
+          placeholder="Image URL (optional)"
+          value={imageUrl}
+          onChange={(event) => setImageUrl(event.target.value)}
+        />
         <button type="button" onClick={() => setScanning(true)}>
           Scan barcode
         </button>
         <button type="submit">Add</button>
       </form>
+
+      {lookupStatus === 'loading' && <p>Looking up product...</p>}
+      {lookupStatus === 'found' && (
+        <p>Product found. Check the name, then enter a best-by date.</p>
+      )}
+      {lookupStatus === 'notfound' && (
+        <p>Product not found. Enter the name manually.</p>
+      )}
+      {lookupStatus === 'error' && (
+        <p>Could not reach Open Food Facts. Enter the name manually.</p>
+      )}
+      {imageUrl && (
+        <img src={imageUrl} alt="Product preview" className="item-image" />
+      )}
 
       <h2>Active</h2>
       <ul className="item-list">
@@ -160,6 +211,9 @@ function App() {
               </form>
             ) : (
               <>
+                {item.imageUrl && (
+                  <img src={item.imageUrl} alt="" className="item-image" />
+                )}
                 <div>{item.name}</div>
                 <div>{item.bestBy}</div>
                 <button onClick={() => markHandled(item.id)}>
@@ -177,6 +231,9 @@ function App() {
       <ul className="item-list">
         {handledItems.map((item) => (
           <li key={item.id} className="item">
+            {item.imageUrl && (
+              <img src={item.imageUrl} alt="" className="item-image" />
+            )}
             <div>{item.name}</div>
             <div>{item.bestBy}</div>
             <button onClick={() => deleteItem(item.id)}>Delete</button>
