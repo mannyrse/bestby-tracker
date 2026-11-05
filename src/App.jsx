@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 
 const starterItems = [
@@ -8,8 +8,23 @@ const starterItems = [
   { id: 4, name: 'Kewpie Mayo', bestBy: '2026-10-30', status: 'handled' },
 ]
 
+const STORAGE_KEY = 'best-by-items'
+
+function loadItems() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY)
+    return saved ? JSON.parse(saved) : starterItems
+  } catch {
+    return starterItems
+  }
+}
+
 function App() {
-  const [items, setItems] = useState(starterItems)
+  const [items, setItems] = useState(loadItems)
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+  }, [items])
   const [name, setName] = useState('')
   const [bestBy, setBestBy] = useState('')
 
