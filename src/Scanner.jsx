@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { BrowserMultiFormatReader } from '@zxing/browser'
+import { BarcodeFormat, DecodeHintType } from '@zxing/library'
 
 function Scanner({ onDetected, onClose }) {
     const videoRef = useRef(null)
@@ -11,14 +12,31 @@ function Scanner({ onDetected, onClose }) {
     })
 
     useEffect(() => {
-        const reader = new BrowserMultiFormatReader()
+        const hints = new Map()
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+            BarcodeFormat.EAN_13,
+            BarcodeFormat.EAN_8,
+            BarcodeFormat.UPC_A,
+            BarcodeFormat.UPC_E,
+        ])
+        hints.set(DecodeHintType.TRY_HARDER, true)
+
+        const reader = new BrowserMultiFormatReader(hints, {
+            delayBetweenScanAttempts: 100,
+        })
         let controls = null
         let stopped = false
 
         const timer = setTimeout(() => {
             reader
                 .decodeFromConstraints(
-                    { video: { facingMode: 'environment' } },
+                    {
+                        video: {
+                            facingMode: 'environment',
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 },
+                        },
+                    },
                     videoRef.current,
                     (result) => {
                         if (result && !stopped) {
