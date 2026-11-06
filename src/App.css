@@ -102,6 +102,19 @@ input {
   color: var(--text);
 }
 
+input[type='date'] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  text-align: left;
+}
+
+input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+}
+
 button:focus-visible,
 input:focus-visible,
 summary:focus-visible {
@@ -192,7 +205,7 @@ summary:focus-visible {
 
 .add-body {
   display: none;
-  padding: 0 16px 16px;
+  padding: 16px 16px 16px;
 }
 
 .add-body.is-open {
@@ -211,6 +224,12 @@ summary:focus-visible {
 .field {
   display: grid;
   gap: 6px;
+}
+
+.add-form,
+.field,
+.edit-form {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .field label {
