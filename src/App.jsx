@@ -2,27 +2,20 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import Scanner from './Scanner'
 import { fetchProduct } from './openFoodFacts'
-
-const starterItems = [
-  { id: 1, name: 'Buldak Ramen', bestBy: '2026-11-08', status: 'active' },
-  { id: 2, name: 'Vitamilk', bestBy: '2026-11-05', status: 'active' },
-  { id: 3, name: 'Yakisoba Noodles', bestBy: '2026-11-12', status: 'active' },
-  { id: 4, name: 'Kewpie Mayo', bestBy: '2026-10-30', status: 'handled' },
-]
-
-const STORAGE_KEY = 'best-by-items'
-
-function loadItems() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? JSON.parse(saved) : starterItems
-  } catch {
-    return starterItems
-  }
-}
+import {
+  fetchItems,
+  insertItem,
+  updateItem,
+  removeItem,
+  findProduct,
+  saveProduct,
+} from './db'
 
 function App() {
-  const [items, setItems] = useState(loadItems)
+  const [items, setItems] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [actionError, setActionError] = useState('')
 
   const [name, setName] = useState('')
   const [bestBy, setBestBy] = useState('')
@@ -38,8 +31,17 @@ function App() {
   const [lookupStatus, setLookupStatus] = useState('')
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
-  }, [items])
+    async function load() {
+      try {
+        setItems(await fetchItems())
+      } catch (error) {
+        console.error(error)
+        setLoadError('Could not load the inventory. Check your connection.')
+      }
+      setLoading(false)
+    }
+    load()
+  }, [])
 
   const activeItems = items
     .filter((item) => item.status === 'active')
@@ -47,11 +49,29 @@ function App() {
 
   const handledItems = items.filter((item) => item.status === 'handled')
 
+  function fail(message, error) {
+    console.error(error)
+    setActionError(message)
+  }
+
   async function lookupBarcode(code) {
     const cleaned = code.trim()
     if (!cleaned) return
 
     setLookupStatus('loading')
+
+    try {
+      const saved = await findProduct(cleaned)
+      if (saved) {
+        setName(saved.name)
+        setImageUrl(saved.imageUrl)
+        setLookupStatus('saved')
+        return
+      }
+    } catch (error) {
+      console.error(error)
+    }
+
     try {
       const product = await fetchProduct(cleaned)
       if (product && product.name) {
@@ -72,17 +92,37 @@ function App() {
     lookupBarcode(code)
   }
 
-  function addItem(event) {
+  async function addItem(event) {
     event.preventDefault()
-    const newItem = {
-      id: Date.now(),
-      name: name.trim(),
-      bestBy: bestBy,
-      barcode: barcode.trim(),
-      imageUrl: imageUrl.trim(),
-      status: 'active',
+    setActionError('')
+    const cleanedBarcode = barcode.trim()
+    const cleanedName = name.trim()
+    const cleanedImage = imageUrl.trim()
+
+    try {
+      const saved = await insertItem({
+        name: cleanedName,
+        bestBy: bestBy,
+        barcode: cleanedBarcode,
+        imageUrl: cleanedImage,
+      })
+      setItems((current) => [...current, saved])
+    } catch (error) {
+      fail('Could not add the item. Please try again.', error)
+      return
     }
-    setItems([...items, newItem])
+
+    if (cleanedBarcode) {
+      try {
+        await saveProduct(cleanedBarcode, {
+          name: cleanedName,
+          imageUrl: cleanedImage,
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
     setName('')
     setBestBy('')
     setBarcode('')
@@ -90,12 +130,16 @@ function App() {
     setLookupStatus('')
   }
 
-  function markHandled(id) {
-    setItems(
-      items.map((item) =>
-        item.id === id ? { ...item, status: 'handled' } : item
+  async function markHandled(id) {
+    setActionError('')
+    try {
+      const updated = await updateItem(id, { status: 'handled' })
+      setItems((current) =>
+        current.map((item) => (item.id === id ? updated : item))
       )
-    )
+    } catch (error) {
+      fail('Could not mark the item as handled.', error)
+    }
   }
 
   function startEdit(item) {
@@ -104,25 +148,35 @@ function App() {
     setEditBestBy(item.bestBy)
   }
 
-  function saveEdit(event) {
+  async function saveEdit(event) {
     event.preventDefault()
-    setItems(
-      items.map((item) =>
-        item.id === editingId
-          ? { ...item, name: editName.trim(), bestBy: editBestBy }
-          : item
+    setActionError('')
+    try {
+      const updated = await updateItem(editingId, {
+        name: editName.trim(),
+        bestBy: editBestBy,
+      })
+      setItems((current) =>
+        current.map((item) => (item.id === editingId ? updated : item))
       )
-    )
-    setEditingId(null)
+      setEditingId(null)
+    } catch (error) {
+      fail('Could not save your changes.', error)
+    }
   }
 
   function cancelEdit() {
     setEditingId(null)
   }
 
-  function deleteItem(id) {
-    if (window.confirm('Delete this entry? This cannot be undone.')) {
-      setItems(items.filter((item) => item.id !== id))
+  async function deleteItem(id) {
+    if (!window.confirm('Delete this entry? This cannot be undone.')) return
+    setActionError('')
+    try {
+      await removeItem(id)
+      setItems((current) => current.filter((item) => item.id !== id))
+    } catch (error) {
+      fail('Could not delete the item.', error)
     }
   }
 
@@ -178,6 +232,9 @@ function App() {
         </form>
 
         {lookupStatus === 'loading' && <p>Looking up product...</p>}
+        {lookupStatus === 'saved' && (
+          <p>Found in your saved products. Enter the best-by date.</p>
+        )}
         {lookupStatus === 'found' && (
           <p>Product found. Check the name, then enter a best-by date.</p>
         )}
@@ -190,6 +247,10 @@ function App() {
         {imageUrl && (
           <img src={imageUrl} alt="Product preview" className="item-image" />
         )}
+
+        {actionError && <p>{actionError}</p>}
+        {loading && <p>Loading inventory...</p>}
+        {loadError && <p>{loadError}</p>}
 
         <h2>Active</h2>
         <ul className="item-list">
