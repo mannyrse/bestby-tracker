@@ -84,3 +84,13 @@ body {
     display: block;
   }
 }
+
+.auth-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px 16px 0;
+}
