@@ -9,7 +9,7 @@ import {
   removeItem,
   findProduct,
   saveProduct,
-} from './db'
+} from '@db'
 
 function App() {
   const [items, setItems] = useState([])
