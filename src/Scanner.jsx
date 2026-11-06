@@ -65,7 +65,7 @@ function Scanner({ onDetected, onClose }) {
     }, [])
 
     return (
-        <div>
+        <div className="scanner">
             <video ref={videoRef} className="scanner-video" muted playsInline />
             {error && <p>{error}</p>}
             <button type="button" onClick={onClose}>

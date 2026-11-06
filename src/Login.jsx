@@ -24,30 +24,40 @@ function Login() {
     }
 
     return (
-        <div className="app">
-            <h1>Best-By Tracker</h1>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="email"
-                    placeholder="Email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    required
-                />
-                <button type="submit" disabled={busy}>
+        <div className="app login-page">
+            <h1 className="login-title">Best-By Tracker</h1>
+            <form className="card add-form" onSubmit={handleSubmit}>
+                <div className="field">
+                    <label htmlFor="email">Email</label>
+                    <input
+                        id="email"
+                        type="email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(event) => setEmail(event.target.value)}
+                        required
+                    />
+                </div>
+                <div className="field">
+                    <label htmlFor="password">Password</label>
+                    <input
+                        id="password"
+                        type="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        required
+                    />
+                </div>
+                <button
+                    type="submit"
+                    className="btn-primary btn-large"
+                    disabled={busy}
+                >
                     {busy ? 'Signing in...' : 'Sign in'}
                 </button>
             </form>
-            {error && <p>{error}</p>}
+            {error && <p className="notice error">{error}</p>}
         </div>
     )
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import Scanner from './Scanner'
+import { describeDue, formatDate } from './dates'
 import { fetchProduct } from './openFoodFacts'
 import {
   fetchItems,
@@ -10,6 +11,17 @@ import {
   findProduct,
   saveProduct,
 } from '@db'
+
+function Thumb({ item }) {
+  if (item.imageUrl) {
+    return <img src={item.imageUrl} alt="" className="item-thumb" />
+  }
+  return (
+    <div className="item-thumb item-thumb-empty" aria-hidden="true">
+      {item.name.charAt(0).toUpperCase()}
+    </div>
+  )
+}
 
 function App() {
   const [items, setItems] = useState([])
@@ -29,6 +41,8 @@ function App() {
 
   const [imageUrl, setImageUrl] = useState('')
   const [lookupStatus, setLookupStatus] = useState('')
+
+  const [addOpen, setAddOpen] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -92,6 +106,11 @@ function App() {
     lookupBarcode(code)
   }
 
+  function toggleAdd() {
+    if (addOpen) setScanning(false)
+    setAddOpen(!addOpen)
+  }
+
   async function addItem(event) {
     event.preventDefault()
     setActionError('')
@@ -128,6 +147,7 @@ function App() {
     setBarcode('')
     setImageUrl('')
     setLookupStatus('')
+    setAddOpen(false)
   }
 
   async function markHandled(id) {
@@ -183,129 +203,261 @@ function App() {
   return (
     <div className="app">
       <div className="screen-only">
-        <h1>Best-By Tracker</h1>
-
-        <button type="button" onClick={() => window.print()}>
-          Print list
-        </button>
-
-        {scanning && (
-          <Scanner
-            onDetected={handleDetected}
-            onClose={() => setScanning(false)}
-          />
-        )}
-
-        <form onSubmit={addItem}>
-          <input
-            type="text"
-            placeholder="Product name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            required
-          />
-          <input
-            type="date"
-            value={bestBy}
-            onChange={(event) => setBestBy(event.target.value)}
-            required
-          />
-          <input
-            type="text"
-            placeholder="Barcode (optional)"
-            value={barcode}
-            onChange={(event) => setBarcode(event.target.value)}
-          />
-          <button type="button" onClick={() => lookupBarcode(barcode)}>
-            Look up
+        <header className="page-header">
+          <h1>Best-By Tracker</h1>
+          <button type="button" onClick={() => window.print()}>
+            Print list
           </button>
-          <input
-            type="text"
-            placeholder="Image URL (optional)"
-            value={imageUrl}
-            onChange={(event) => setImageUrl(event.target.value)}
-          />
-          <button type="button" onClick={() => setScanning(true)}>
-            Scan barcode
-          </button>
-          <button type="submit">Add</button>
-        </form>
+        </header>
 
-        {lookupStatus === 'loading' && <p>Looking up product...</p>}
-        {lookupStatus === 'saved' && (
-          <p>Found in your saved products. Enter the best-by date.</p>
-        )}
-        {lookupStatus === 'found' && (
-          <p>Product found. Check the name, then enter a best-by date.</p>
-        )}
-        {lookupStatus === 'notfound' && (
-          <p>Product not found. Enter the name manually.</p>
-        )}
-        {lookupStatus === 'error' && (
-          <p>Could not reach Open Food Facts. Enter the name manually.</p>
-        )}
-        {imageUrl && (
-          <img src={imageUrl} alt="Product preview" className="item-image" />
-        )}
+        <div className="layout">
+          <aside className="sidebar">
+            <section className="card add-section">
+              <button
+                type="button"
+                className="panel-toggle"
+                aria-expanded={addOpen}
+                aria-controls="add-body"
+                onClick={toggleAdd}
+              >
+                Add item
+              </button>
 
-        {actionError && <p>{actionError}</p>}
-        {loading && <p>Loading inventory...</p>}
-        {loadError && <p>{loadError}</p>}
+              <div
+                id="add-body"
+                className={`add-body ${addOpen ? 'is-open' : ''}`}
+              >
+                <h2 className="add-title">Add item</h2>
 
-        <h2>Active</h2>
-        <ul className="item-list">
-          {activeItems.map((item) => (
-            <li key={item.id} className="item">
-              {item.id === editingId ? (
-                <form onSubmit={saveEdit}>
-                  <input
-                    type="text"
-                    value={editName}
-                    onChange={(event) => setEditName(event.target.value)}
-                    required
+                {scanning && (
+                  <Scanner
+                    onDetected={handleDetected}
+                    onClose={() => setScanning(false)}
                   />
-                  <input
-                    type="date"
-                    value={editBestBy}
-                    onChange={(event) => setEditBestBy(event.target.value)}
-                    required
-                  />
-                  <button type="submit">Save</button>
-                  <button type="button" onClick={cancelEdit}>
-                    Cancel
+                )}
+
+                <form className="add-form" onSubmit={addItem}>
+                  <button
+                    type="button"
+                    className="btn-primary btn-large"
+                    onClick={() => setScanning(true)}
+                  >
+                    Scan barcode
+                  </button>
+
+                  <div className="field">
+                    <label htmlFor="barcode">Barcode (optional)</label>
+                    <div className="barcode-row">
+                      <input
+                        id="barcode"
+                        type="text"
+                        inputMode="numeric"
+                        value={barcode}
+                        onChange={(event) => setBarcode(event.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => lookupBarcode(barcode)}
+                      >
+                        Look up
+                      </button>
+                    </div>
+                  </div>
+
+                  {lookupStatus === 'loading' && (
+                    <p className="notice">Looking up product...</p>
+                  )}
+                  {lookupStatus === 'saved' && (
+                    <p className="notice">
+                      Found in your saved products. Enter the best-by date.
+                    </p>
+                  )}
+                  {lookupStatus === 'found' && (
+                    <p className="notice">
+                      Product found. Check the name, then enter a best-by date.
+                    </p>
+                  )}
+                  {lookupStatus === 'notfound' && (
+                    <p className="notice warn">
+                      Product not found. Enter the name manually.
+                    </p>
+                  )}
+                  {lookupStatus === 'error' && (
+                    <p className="notice warn">
+                      Could not reach Open Food Facts. Enter the name manually.
+                    </p>
+                  )}
+
+                  {imageUrl && (
+                    <img
+                      src={imageUrl}
+                      alt="Product preview"
+                      className="preview"
+                    />
+                  )}
+
+                  <div className="field">
+                    <label htmlFor="name">Product name</label>
+                    <input
+                      id="name"
+                      type="text"
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor="best-by">Best-by date</label>
+                    <input
+                      id="best-by"
+                      type="date"
+                      value={bestBy}
+                      onChange={(event) => setBestBy(event.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <details className="more">
+                    <summary>Image (optional)</summary>
+                    <div className="field">
+                      <label htmlFor="image-url">Image URL</label>
+                      <input
+                        id="image-url"
+                        type="text"
+                        value={imageUrl}
+                        onChange={(event) => setImageUrl(event.target.value)}
+                      />
+                    </div>
+                  </details>
+
+                  <button type="submit" className="btn-primary btn-large">
+                    Add to list
                   </button>
                 </form>
-              ) : (
-                <>
-                  {item.imageUrl && (
-                    <img src={item.imageUrl} alt="" className="item-image" />
-                  )}
-                  <div>{item.name}</div>
-                  <div>{item.bestBy}</div>
-                  <button onClick={() => markHandled(item.id)}>
-                    Mark handled
-                  </button>
-                  <button onClick={() => startEdit(item)}>Edit</button>
-                  <button onClick={() => deleteItem(item.id)}>Delete</button>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+              </div>
+            </section>
+          </aside>
 
-        <h2>Handled</h2>
-        <ul className="item-list">
-          {handledItems.map((item) => (
-            <li key={item.id} className="item">
-              {item.imageUrl && (
-                <img src={item.imageUrl} alt="" className="item-image" />
-              )}
-              <div>{item.name}</div>
-              <div>{item.bestBy}</div>
-              <button onClick={() => deleteItem(item.id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
+          <main className="main-col">
+            {actionError && <p className="notice error">{actionError}</p>}
+            {loading && <p className="notice">Loading inventory...</p>}
+            {loadError && <p className="notice error">{loadError}</p>}
+
+            <h2>Active ({activeItems.length})</h2>
+            {!loading && !loadError && activeItems.length === 0 && (
+              <p className="empty">
+                Nothing to track yet. Add an item to get started.
+              </p>
+            )}
+            <ul className="item-list">
+              {activeItems.map((item) => {
+                const due = describeDue(item.bestBy)
+                return (
+                  <li key={item.id} className={`item tone-${due.tone}`}>
+                    {item.id === editingId ? (
+                      <form className="edit-form" onSubmit={saveEdit}>
+                        <input
+                          type="text"
+                          aria-label="Product name"
+                          value={editName}
+                          onChange={(event) => setEditName(event.target.value)}
+                          required
+                        />
+                        <input
+                          type="date"
+                          aria-label="Best-by date"
+                          value={editBestBy}
+                          onChange={(event) =>
+                            setEditBestBy(event.target.value)
+                          }
+                          required
+                        />
+                        <div className="edit-actions">
+                          <button type="submit" className="btn-primary">
+                            Save
+                          </button>
+                          <button type="button" onClick={cancelEdit}>
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <>
+                        <div className="item-main">
+                          <Thumb item={item} />
+                          <div className="item-text">
+                            <div className="item-name">{item.name}</div>
+                            <div className="item-meta">
+                              <span className={`chip chip-${due.tone}`}>
+                                {due.label}
+                              </span>
+                              <span className="item-date">
+                                {formatDate(item.bestBy)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="item-actions">
+                          <button
+                            type="button"
+                            className="btn-primary"
+                            onClick={() => markHandled(item.id)}
+                          >
+                            Mark handled
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => startEdit(item)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            className="btn-danger"
+                            onClick={() => deleteItem(item.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+
+            <details className="handled">
+              <summary>Handled ({handledItems.length})</summary>
+              <ul className="item-list">
+                {handledItems.map((item) => (
+                  <li key={item.id} className="item is-handled">
+                    <div className="item-main">
+                      <Thumb item={item} />
+                      <div className="item-text">
+                        <div className="item-name">{item.name}</div>
+                        <div className="item-meta">
+                          <span className="item-date">
+                            {formatDate(item.bestBy)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="item-actions">
+                      <button
+                        type="button"
+                        className="btn-danger"
+                        onClick={() => deleteItem(item.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          </main>
+        </div>
       </div>
 
       <div className="print-only">
