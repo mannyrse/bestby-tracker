@@ -128,118 +128,154 @@ function App() {
 
   return (
     <div className="app">
-      <h1>Best-By Tracker</h1>
+      <div className="screen-only">
+        <h1>Best-By Tracker</h1>
 
-      {scanning && (
-        <Scanner
-          onDetected={handleDetected}
-          onClose={() => setScanning(false)}
-        />
-      )}
-
-      <form onSubmit={addItem}>
-        <input
-          type="text"
-          placeholder="Product name"
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          required
-        />
-        <input
-          type="date"
-          value={bestBy}
-          onChange={(event) => setBestBy(event.target.value)}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Barcode (optional)"
-          value={barcode}
-          onChange={(event) => setBarcode(event.target.value)}
-        />
-        <button type="button" onClick={() => lookupBarcode(barcode)}>
-          Look up
+        <button type="button" onClick={() => window.print()}>
+          Print list
         </button>
-        <input
-          type="text"
-          placeholder="Image URL (optional)"
-          value={imageUrl}
-          onChange={(event) => setImageUrl(event.target.value)}
-        />
-        <button type="button" onClick={() => setScanning(true)}>
-          Scan barcode
-        </button>
-        <button type="submit">Add</button>
-      </form>
 
-      {lookupStatus === 'loading' && <p>Looking up product...</p>}
-      {lookupStatus === 'found' && (
-        <p>Product found. Check the name, then enter a best-by date.</p>
-      )}
-      {lookupStatus === 'notfound' && (
-        <p>Product not found. Enter the name manually.</p>
-      )}
-      {lookupStatus === 'error' && (
-        <p>Could not reach Open Food Facts. Enter the name manually.</p>
-      )}
-      {imageUrl && (
-        <img src={imageUrl} alt="Product preview" className="item-image" />
-      )}
+        {scanning && (
+          <Scanner
+            onDetected={handleDetected}
+            onClose={() => setScanning(false)}
+          />
+        )}
 
-      <h2>Active</h2>
-      <ul className="item-list">
-        {activeItems.map((item) => (
-          <li key={item.id} className="item">
-            {item.id === editingId ? (
-              <form onSubmit={saveEdit}>
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(event) => setEditName(event.target.value)}
-                  required
-                />
-                <input
-                  type="date"
-                  value={editBestBy}
-                  onChange={(event) => setEditBestBy(event.target.value)}
-                  required
-                />
-                <button type="submit">Save</button>
-                <button type="button" onClick={cancelEdit}>
-                  Cancel
-                </button>
-              </form>
-            ) : (
-              <>
-                {item.imageUrl && (
-                  <img src={item.imageUrl} alt="" className="item-image" />
-                )}
-                <div>{item.name}</div>
-                <div>{item.bestBy}</div>
-                <button onClick={() => markHandled(item.id)}>
-                  Mark handled
-                </button>
-                <button onClick={() => startEdit(item)}>Edit</button>
-                <button onClick={() => deleteItem(item.id)}>Delete</button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+        <form onSubmit={addItem}>
+          <input
+            type="text"
+            placeholder="Product name"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            required
+          />
+          <input
+            type="date"
+            value={bestBy}
+            onChange={(event) => setBestBy(event.target.value)}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Barcode (optional)"
+            value={barcode}
+            onChange={(event) => setBarcode(event.target.value)}
+          />
+          <button type="button" onClick={() => lookupBarcode(barcode)}>
+            Look up
+          </button>
+          <input
+            type="text"
+            placeholder="Image URL (optional)"
+            value={imageUrl}
+            onChange={(event) => setImageUrl(event.target.value)}
+          />
+          <button type="button" onClick={() => setScanning(true)}>
+            Scan barcode
+          </button>
+          <button type="submit">Add</button>
+        </form>
 
-      <h2>Handled</h2>
-      <ul className="item-list">
-        {handledItems.map((item) => (
-          <li key={item.id} className="item">
-            {item.imageUrl && (
-              <img src={item.imageUrl} alt="" className="item-image" />
-            )}
-            <div>{item.name}</div>
-            <div>{item.bestBy}</div>
-            <button onClick={() => deleteItem(item.id)}>Delete</button>
-          </li>
-        ))}
-      </ul>
+        {lookupStatus === 'loading' && <p>Looking up product...</p>}
+        {lookupStatus === 'found' && (
+          <p>Product found. Check the name, then enter a best-by date.</p>
+        )}
+        {lookupStatus === 'notfound' && (
+          <p>Product not found. Enter the name manually.</p>
+        )}
+        {lookupStatus === 'error' && (
+          <p>Could not reach Open Food Facts. Enter the name manually.</p>
+        )}
+        {imageUrl && (
+          <img src={imageUrl} alt="Product preview" className="item-image" />
+        )}
+
+        <h2>Active</h2>
+        <ul className="item-list">
+          {activeItems.map((item) => (
+            <li key={item.id} className="item">
+              {item.id === editingId ? (
+                <form onSubmit={saveEdit}>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(event) => setEditName(event.target.value)}
+                    required
+                  />
+                  <input
+                    type="date"
+                    value={editBestBy}
+                    onChange={(event) => setEditBestBy(event.target.value)}
+                    required
+                  />
+                  <button type="submit">Save</button>
+                  <button type="button" onClick={cancelEdit}>
+                    Cancel
+                  </button>
+                </form>
+              ) : (
+                <>
+                  {item.imageUrl && (
+                    <img src={item.imageUrl} alt="" className="item-image" />
+                  )}
+                  <div>{item.name}</div>
+                  <div>{item.bestBy}</div>
+                  <button onClick={() => markHandled(item.id)}>
+                    Mark handled
+                  </button>
+                  <button onClick={() => startEdit(item)}>Edit</button>
+                  <button onClick={() => deleteItem(item.id)}>Delete</button>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
+
+        <h2>Handled</h2>
+        <ul className="item-list">
+          {handledItems.map((item) => (
+            <li key={item.id} className="item">
+              {item.imageUrl && (
+                <img src={item.imageUrl} alt="" className="item-image" />
+              )}
+              <div>{item.name}</div>
+              <div>{item.bestBy}</div>
+              <button onClick={() => deleteItem(item.id)}>Delete</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="print-only">
+        <h1>Best-By List</h1>
+        <p>Printed {new Date().toLocaleDateString()}</p>
+
+        {activeItems.length === 0 ? (
+          <p>No active items.</p>
+        ) : (
+          <table className="print-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Product</th>
+                <th>Best by</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activeItems.map((item) => (
+                <tr key={item.id}>
+                  <td>
+                    <span className="print-box"></span>
+                  </td>
+                  <td>{item.name}</td>
+                  <td>{item.bestBy}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   )
 }

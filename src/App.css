@@ -45,3 +45,42 @@ body {
   height: 48px;
   object-fit: contain;
 }
+
+/* Print */
+
+.print-only {
+  display: none;
+}
+
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.print-table th,
+.print-table td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #999;
+}
+
+.print-table tr {
+  break-inside: avoid;
+}
+
+.print-box {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #000;
+}
+
+@media print {
+  .screen-only {
+    display: none;
+  }
+
+  .print-only {
+    display: block;
+  }
+}
