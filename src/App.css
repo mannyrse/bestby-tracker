@@ -105,14 +105,22 @@ input {
 input[type='date'] {
   -webkit-appearance: none;
   appearance: none;
-  display: block;
+  display: flex;
+  align-items: center;
   min-width: 0;
   max-width: 100%;
+  line-height: 1.2;
   text-align: left;
 }
 
 input[type='date']::-webkit-date-and-time-value {
+  min-height: 1.2em;
+  margin: 0;
   text-align: left;
+}
+
+input[type='date']::-webkit-datetime-edit {
+  padding: 0;
 }
 
 button:focus-visible,
