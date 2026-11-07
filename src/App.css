@@ -240,6 +240,17 @@ summary:focus-visible {
   grid-template-columns: minmax(0, 1fr);
 }
 
+.form-actions {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+.form-actions button {
+  min-height: 52px;
+  font-size: 1.05rem;
+}
+
 .field label {
   font-size: 0.85rem;
   font-weight: 600;

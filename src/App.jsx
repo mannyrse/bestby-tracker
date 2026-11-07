@@ -111,6 +111,18 @@ function App() {
     setAddOpen(!addOpen)
   }
 
+  function clearForm() {
+    setName('')
+    setBestBy('')
+    setBarcode('')
+    setImageUrl('')
+    setLookupStatus('')
+    setScanning(false)
+  }
+
+  const formIsEmpty =
+    !name && !bestBy && !barcode && !imageUrl && !lookupStatus && !scanning
+
   async function addItem(event) {
     event.preventDefault()
     setActionError('')
@@ -331,9 +343,14 @@ function App() {
                     </div>
                   </details>
 
-                  <button type="submit" className="btn-primary btn-large">
-                    Add to list
-                  </button>
+                  <div className="form-actions">
+                    <button type="button" onClick={clearForm} disabled={formIsEmpty}>
+                      Clear
+                    </button>
+                    <button type="submit" className="btn-primary btn-large">
+                      Add to list
+                    </button>
+                  </div>
                 </form>
               </div>
             </section>
