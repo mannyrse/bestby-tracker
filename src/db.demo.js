@@ -12,11 +12,38 @@ function daysFromToday(offset) {
 
 function sampleItems() {
     return [
-        { id: 1, name: 'Buldak Ramen', bestBy: daysFromToday(1), barcode: '8801073110502', imageUrl: 'https://pi.nice-cdn.com/upload/image/product/large/default/samyang-buldak-hot-chicken-flavor-ramen-8-piece-bulk-pack-1552652-en.jpg', status: 'active' },
-        { id: 2, name: 'Melona Banana Ice cream', bestBy: daysFromToday(3), barcode: '0769828120849', imageUrl: 'https://www.kroger.com/product/images/large/front/0076982812035', status: 'active' },
-        { id: 3, name: 'Lucky Me Pancit Canton | Kalamansi Flavor', bestBy: daysFromToday(9), barcode: '4807770273674', imageUrl: 'https://images.openfoodfacts.org/images/products/480/777/027/3674/front_en.63.400.jpg', status: 'active' },
-        { id: 4, name: 'C.C. Lemon', bestBy: daysFromToday(6), barcode: '4901777064461', imageUrl: 'https://i.ebayimg.com/images/g/C-UAAOSwR0BgrZ7i/s-l1200.jpg', status: 'active' },
-        { id: 5, name: 'Kewpie Mayo', bestBy: daysFromToday(-2), barcode: '4901577048234', imageUrl: 'https://wafuu.com/cdn/shop/products/kewpie-mayo-japanese-mayonnaise-450g-311680.png?v=1695255510', status: 'handled' },
+        {
+            id: 1,
+            name: 'Buldak Ramen',
+            bestBy: daysFromToday(1),
+            barcode: '8801073110502',
+            imageUrl: 'https://pi.nice-cdn.com/upload/image/product/large/default/samyang-buldak-hot-chicken-flavor-ramen-8-piece-bulk-pack-1552652-en.jpg',
+            status: 'active',
+        },
+        {
+            id: 2,
+            name: 'Melona Banana Ice cream',
+            bestBy: daysFromToday(2),
+            barcode: '0769828120849',
+            imageUrl: 'https://www.kroger.com/product/images/large/front/0076982812035',
+            status: 'active',
+        },
+        {
+            id: 3,
+            name: 'C.C. Lemon',
+            bestBy: daysFromToday(-2),
+            barcode: '4901777064461',
+            imageUrl: 'https://i.ebayimg.com/images/g/C-UAAOSwR0BgrZ7i/s-l1200.jpg',
+            status: 'active',
+        },
+        {
+            id: 4,
+            name: 'Kewpie Mayo',
+            bestBy: daysFromToday(-4),
+            barcode: '4901577048234',
+            imageUrl: 'https://wafuu.com/cdn/shop/products/kewpie-mayo-japanese-mayonnaise-450g-311680.png?v=1695255510',
+            status: 'handled',
+        },
     ]
 }
 
