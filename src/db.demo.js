@@ -38,6 +38,14 @@ function sampleItems() {
         },
         {
             id: 4,
+            name: 'Pancit Canton Calamansi',
+            bestBy: daysFromToday(-10),
+            barcode: '4901777064461',
+            imageUrl: 'https://shoplilimart.com/cdn/shop/files/LuckyMePCKalamansi.webp?v=1773730957&width=1080',
+            status: 'active',
+        },
+        {
+            id: 5,
             name: 'Kewpie Mayo',
             bestBy: daysFromToday(-4),
             barcode: '4901577048234',
