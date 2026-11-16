@@ -174,6 +174,18 @@ function App() {
     }
   }
 
+  async function restoreItem(id) {
+    setActionError('')
+    try {
+      const updated = await updateItem(id, { status: 'active' })
+      setItems((current) =>
+        current.map((item) => (item.id === id ? updated : item))
+      )
+    } catch (error) {
+      fail('Could not restore the item.', error)
+    }
+  }
+
   function startEdit(item) {
     setEditingId(item.id)
     setEditName(item.name)
@@ -461,6 +473,9 @@ function App() {
                       </div>
                     </div>
                     <div className="item-actions">
+                      <button type="button" onClick={() => restoreItem(item.id)}>
+                        Restore
+                      </button>
                       <button
                         type="button"
                         className="btn-danger"
