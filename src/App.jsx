@@ -251,119 +251,122 @@ function App() {
                 id="add-body"
                 className={`add-body ${addOpen ? 'is-open' : ''}`}
               >
-                <h2 className="add-title">Add item</h2>
-
-                {scanning && (
-                  <Scanner
-                    onDetected={handleDetected}
-                    onClose={() => setScanning(false)}
-                  />
-                )}
-
-                <form className="add-form" onSubmit={addItem}>
-                  <button
-                    type="button"
-                    className="btn-primary btn-large"
-                    onClick={() => setScanning(true)}
-                  >
-                    Scan barcode
-                  </button>
-
-                  <div className="field">
-                    <label htmlFor="barcode">Barcode (optional)</label>
-                    <div className="barcode-row">
-                      <input
-                        id="barcode"
-                        type="text"
-                        inputMode="numeric"
-                        value={barcode}
-                        onChange={(event) => setBarcode(event.target.value)}
+                <div className="add-body-clip">
+                  <div className="add-body-inner">
+                    <h2 className="add-title">Add item</h2>
+                    {scanning && (
+                      <Scanner
+                        onDetected={handleDetected}
+                        onClose={() => setScanning(false)}
                       />
+                    )}
+
+                    <form className="add-form" onSubmit={addItem}>
                       <button
                         type="button"
-                        onClick={() => lookupBarcode(barcode)}
+                        className="btn-primary btn-large"
+                        onClick={() => setScanning(true)}
                       >
-                        Look up
+                        Scan barcode
                       </button>
-                    </div>
+
+                      <div className="field">
+                        <label htmlFor="barcode">Barcode (optional)</label>
+                        <div className="barcode-row">
+                          <input
+                            id="barcode"
+                            type="text"
+                            inputMode="numeric"
+                            value={barcode}
+                            onChange={(event) => setBarcode(event.target.value)}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => lookupBarcode(barcode)}
+                          >
+                            Look up
+                          </button>
+                        </div>
+                      </div>
+
+                      {lookupStatus === 'loading' && (
+                        <p className="notice">Looking up product...</p>
+                      )}
+                      {lookupStatus === 'saved' && (
+                        <p className="notice">
+                          Found in your saved products. Enter the best-by date.
+                        </p>
+                      )}
+                      {lookupStatus === 'found' && (
+                        <p className="notice">
+                          Product found. Check the name, then enter a best-by date.
+                        </p>
+                      )}
+                      {lookupStatus === 'notfound' && (
+                        <p className="notice warn">
+                          Product not found. Enter the name manually.
+                        </p>
+                      )}
+                      {lookupStatus === 'error' && (
+                        <p className="notice warn">
+                          Could not reach Open Food Facts. Enter the name manually.
+                        </p>
+                      )}
+
+                      {imageUrl && (
+                        <img
+                          src={imageUrl}
+                          alt="Product preview"
+                          className="preview"
+                        />
+                      )}
+
+                      <div className="field">
+                        <label htmlFor="name">Product name</label>
+                        <input
+                          id="name"
+                          type="text"
+                          value={name}
+                          onChange={(event) => setName(event.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label htmlFor="best-by">Best-by date</label>
+                        <input
+                          id="best-by"
+                          type="date"
+                          value={bestBy}
+                          onChange={(event) => setBestBy(event.target.value)}
+                          required
+                        />
+                      </div>
+
+                      <details className="more">
+                        <summary>Image (optional)</summary>
+                        <div className="field">
+                          <label htmlFor="image-url">Image URL</label>
+                          <input
+                            id="image-url"
+                            type="text"
+                            value={imageUrl}
+                            onChange={(event) => setImageUrl(event.target.value)}
+                          />
+                        </div>
+                      </details>
+
+                      <div className="form-actions">
+                        <button type="button" onClick={clearForm} disabled={formIsEmpty}>
+                          Clear
+                        </button>
+                        <button type="submit" className="btn-primary btn-large">
+                          Add to list
+                        </button>
+                      </div>
+                    </form>
                   </div>
-
-                  {lookupStatus === 'loading' && (
-                    <p className="notice">Looking up product...</p>
-                  )}
-                  {lookupStatus === 'saved' && (
-                    <p className="notice">
-                      Found in your saved products. Enter the best-by date.
-                    </p>
-                  )}
-                  {lookupStatus === 'found' && (
-                    <p className="notice">
-                      Product found. Check the name, then enter a best-by date.
-                    </p>
-                  )}
-                  {lookupStatus === 'notfound' && (
-                    <p className="notice warn">
-                      Product not found. Enter the name manually.
-                    </p>
-                  )}
-                  {lookupStatus === 'error' && (
-                    <p className="notice warn">
-                      Could not reach Open Food Facts. Enter the name manually.
-                    </p>
-                  )}
-
-                  {imageUrl && (
-                    <img
-                      src={imageUrl}
-                      alt="Product preview"
-                      className="preview"
-                    />
-                  )}
-
-                  <div className="field">
-                    <label htmlFor="name">Product name</label>
-                    <input
-                      id="name"
-                      type="text"
-                      value={name}
-                      onChange={(event) => setName(event.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <div className="field">
-                    <label htmlFor="best-by">Best-by date</label>
-                    <input
-                      id="best-by"
-                      type="date"
-                      value={bestBy}
-                      onChange={(event) => setBestBy(event.target.value)}
-                      required
-                    />
-                  </div>
-
-                  <details className="more">
-                    <summary>Image (optional)</summary>
-                    <div className="field">
-                      <label htmlFor="image-url">Image URL</label>
-                      <input
-                        id="image-url"
-                        type="text"
-                        value={imageUrl}
-                        onChange={(event) => setImageUrl(event.target.value)}
-                      />
-                    </div>
-                  </details>
-
-                  <div className="form-actions">
-                    <button type="button" onClick={clearForm} disabled={formIsEmpty}>
-                      Clear
-                    </button>
-                    <button type="submit" className="btn-primary btn-large">
-                      Add to list
-                    </button>
-                  </div>
-                </form>
+                </div>
               </div>
             </section>
           </aside>
